@@ -1,662 +1,681 @@
-<?php include("config.php"); ?>	
+<?php include("config.php"); ?>    
 
 <?php
 
 
-    #   Conectarse a la base de datos.
+#   Conectarse a la base de datos.
 
-	function conectarBD() {
-		
-		try {		#	
-		
-			$conexion = new PDO("mysql:host=".HOST."; dbname=".DBNAME."; charset=utf8", USER, PASSWORD);	
+function conectarBD()
+{
 
-			$conexion -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-			
-		} catch (PDOException $e) {		
-			
-			echo "Error: Error al conectarse con la base de datos: ". $e -> getMessage();
+    try {		#	
 
-			file_put_contents("PDOErrors.txt", "\r\n".date('j F, Y, g:i a ').$e -> getMessage(), FILE_APPEND);
+        $conexion = new PDO("mysql:host=" . HOST . "; dbname=" . DBNAME . "; charset=utf8", USER, PASSWORD);
 
-			exit;
-	
-		}
-		
-		return $conexion;
-		
-	} 
+        $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+    } catch (PDOException $e) {
 
-	#   Desconectarse de la base de datos.
+        echo "Error: Error al conectarse con la base de datos: " . $e->getMessage();
 
-	function desconectarBD($conexion) {
-		
-		$conexion = NULL;
-	
-	}
+        file_put_contents("PDOErrors.txt", "\r\n" . date('j F, Y, g:i a ') . $e->getMessage(), FILE_APPEND);
 
-
-    #   Añadir un nuevo usuario a la base de datos.
-
-	function registro ($email, $password, $nombre, $apellidos, $direccion, $telefono) {
-
-		$conexion = conectarBD();
-
-		$password = password_hash ($password, PASSWORD_BCRYPT);
-
-		try { 
-
-			$sql = "INSERT INTO usuarios (email, password, nombre, apellidos, direccion, telefono, admin, online) VALUES (:email, :password, :nombre, :apellidos, :direccion, :telefono, 0, 1)";	
-
-			$stmt = $conexion -> prepare($sql);
-
-			$stmt -> bindParam(':email', $email);
-			$stmt -> bindParam(':password',  $password);
-            $stmt -> bindParam(':nombre', $nombre);
-            $stmt -> bindParam(':apellidos', $apellidos);
-            $stmt -> bindParam(':direccion', $direccion);	
-            $stmt -> bindParam(':telefono', $telefono);
-
-			$stmt -> execute();
-		
-		} catch (PDOException $e) {		
-
-			echo "Error: Error al conectarse con la base de datos: ". $e -> getMessage();
-
-			file_put_contents("PDOErrors.txt", "\r\n".date('j F, Y, g:i a ').$e -> getMessage(), FILE_APPEND);
-
-			exit;
-				
-		}
-
-		$numfilas = $stmt -> rowCount();
-
-		desconectarBD ($conexion);
-
-		return $numfilas; 
-
-	}
-
-
-    #   Comprobar durante el registro que no existe un usuario con el email introducido.
-
-	function seleccionar_email ($email) {
-
-		$conexion = conectarBD();
-
-		try { 
-
-			$sql = "SELECT * FROM usuarios WHERE email = :email";
-
-			$stmt = $conexion -> prepare($sql);
-
-			$stmt -> bindParam(':email', $email);
-
-			$stmt -> execute();
-		
-		} catch (PDOException $e) {		
-
-			echo "Error: Error al conectarse con la base de datos: ". $e -> getMessage();
-
-			file_put_contents("PDOErrors.txt", "\r\n".date('j F, Y, g:i a ').$e -> getMessage(), FILE_APPEND);
-
-			exit;
-				
-		}
-
-		$numfilas = $stmt -> rowCount();
-
-		desconectarBD($conexion);
-
-		return $numfilas; 
-
-	}
-
-
-    #   Iniciar sesión.
-
-	function login ($email, $password) {		
-
-		$conexion = conectarBD();
-
-		try {			
-
-			$sql = "SELECT * FROM usuarios WHERE email = :email AND online = 1";  
-
-			$stmt = $conexion -> prepare($sql);
-
-			$stmt -> bindParam(':email', $email);
-
-			$stmt -> execute();
-
-			$row = $stmt -> fetch (PDO::FETCH_ASSOC);
-
-		} catch (PDOException $e) {		
-
-			echo "Error: Error al conectarse con la base de datos: ". $e -> getMessage();
-
-			file_put_contents("PDOErrors.txt", "\r\n".date('j F, Y, g:i a ').$e -> getMessage(), FILE_APPEND);
-
-			exit;
-				
-		}
-
-		return password_verify ($password, $row['password']);		
-
-	}
-
-
-    #   Consulta para mostrar todos los productos y hacer la paginación.
-
-    function paginacion_productos ($inicio, $numelementos) {
-
-        $conexion = conectarBD();
-
-        try {
-
-            $sql = "SELECT * from productos WHERE estado = 1 order by idProducto DESC LIMIT :inicio, :numelementos";
-
-            $stmt = $conexion -> prepare($sql);
-
-            $stmt -> bindParam(':inicio', $inicio, PDO::PARAM_INT);
-            $stmt -> bindParam(':numelementos',  $numelementos, PDO::PARAM_INT);	
-
-            $stmt -> execute();
-
-            $rows = $stmt -> fetchAll(PDO::FETCH_ASSOC);		
-
-        } catch (PDOException $e) {		
-
-            echo "Error: Error al conectarse con la base de datos: ". $e -> getMessage();
-
-            file_put_contents("PDOErrors.txt", "\r\n".date('j F, Y, g:i a ').$e -> getMessage(), FILE_APPEND);
-
-            exit;
-                
-        }
-        
-        desconectarBD($conexion);
-
-        return $rows;		
+        exit;
 
     }
 
+    return $conexion;
 
-    #   Necesario para paginación. Calcula el número de páginas a mostrar según el número de elementos de la base de datos.
-
-    function num_paginas_productos ($numelementos) {
-
-        $conexion = conectarBD();
-
-        try {	
-
-            $sql = "SELECT count(*) FROM productos WHERE estado = 1";
-
-            $numproductos = $conexion -> query($sql) -> fetchColumn();
-
-        } catch (PDOException $e) {		
-
-            echo "Error: Error al conectarse con la base de datos: ". $e -> getMessage();
-
-            file_put_contents("PDOErrors.txt", "\r\n".date('j F, Y, g:i a ').$e -> getMessage(), FILE_APPEND);
-
-            exit;
-                
-        }
-
-        $numpaginas = ceil ($numproductos / $numelementos);
-
-        desconectarBD($conexion);
-
-        return $numpaginas;		
-
-    } 
+}
 
 
-    #   Consulta para mostrar todos los pedidos de un usuario y hacer la paginación.
+#   Desconectarse de la base de datos.
 
-    function paginacion_pedidos ($inicio, $numelementos, $idUsuario) {
+function desconectarBD($conexion)
+{
 
-        $conexion = conectarBD();
+    $conexion = NULL;
 
-        try {
+}
 
-            $sql = "SELECT a.*, b.estado from pedidos a, estados b WHERE idUsuario = :idUsuario  AND a.idEstado = b.idEstado ORDER BY a.fecha DESC LIMIT :inicio, :numelementos";
 
-            $stmt = $conexion -> prepare($sql);
+#   Añadir un nuevo usuario a la base de datos.
 
-            $stmt -> bindParam(':inicio', $inicio, PDO::PARAM_INT);
-            $stmt -> bindParam(':numelementos',  $numelementos, PDO::PARAM_INT);
-            $stmt -> bindParam(':idUsuario', $idUsuario);	
+function registro($email, $password, $nombre, $apellidos, $direccion, $telefono)
+{
 
-            $stmt -> execute();
+    $conexion = conectarBD();
 
-            $rows = $stmt -> fetchAll(PDO::FETCH_ASSOC);		
+    $password = password_hash($password, PASSWORD_BCRYPT);
 
-        } catch (PDOException $e) {		
+    try {
 
-            echo "Error: Error al conectarse con la base de datos: ". $e -> getMessage();
+        $sql = "INSERT INTO usuarios (email, password, nombre, apellidos, direccion, telefono, admin, online) VALUES (:email, :password, :nombre, :apellidos, :direccion, :telefono, 0, 1)";
 
-            file_put_contents("PDOErrors.txt", "\r\n".date('j F, Y, g:i a ').$e -> getMessage(), FILE_APPEND);
+        $stmt = $conexion->prepare($sql);
 
-            exit;
-                
-        }
-        
-        desconectarBD($conexion);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':password', $password);
+        $stmt->bindParam(':nombre', $nombre);
+        $stmt->bindParam(':apellidos', $apellidos);
+        $stmt->bindParam(':direccion', $direccion);
+        $stmt->bindParam(':telefono', $telefono);
 
-        return $rows;		
+        $stmt->execute();
+
+    } catch (PDOException $e) {
+
+        echo "Error: Error al conectarse con la base de datos: " . $e->getMessage();
+
+        file_put_contents("PDOErrors.txt", "\r\n" . date('j F, Y, g:i a ') . $e->getMessage(), FILE_APPEND);
+
+        exit;
 
     }
 
+    $numfilas = $stmt->rowCount();
 
-     #   Necesario para paginación. Calcula el número de páginas a mostrar según el número de elementos de la base de datos.
-   
-    function num_paginas_pedidos ($numelementos) {
+    desconectarBD($conexion);
 
-        $conexion = conectarBD();
+    return $numfilas;
 
-        try {	
+}
 
-            $sql = "SELECT count(*) FROM pedidos WHERE idUsuario = :idUsuario";
 
-            $stmt = $conexion -> prepare($sql);
+#   Comprobar durante el registro que no existe un usuario con el email introducido.
 
-            $stmt -> bindParam(':idUsuario', $idUsuario, PDO::PARAM_INT);
+function seleccionar_email($email)
+{
 
-            $stmt -> execute();
+    $conexion = conectarBD();
 
-            $numpedidos = $stmt -> fetchColumn();
+    try {
 
-        } catch (PDOException $e) {		
+        $sql = "SELECT * FROM usuarios WHERE email = :email";
 
-            echo "Error: Error al conectarse con la base de datos: ". $e -> getMessage();
+        $stmt = $conexion->prepare($sql);
 
-            file_put_contents("PDOErrors.txt", "\r\n".date('j F, Y, g:i a ').$e -> getMessage(), FILE_APPEND);
+        $stmt->bindParam(':email', $email);
 
-            exit;
-                
-        }
+        $stmt->execute();
 
-        $numpaginas = ceil ($numpedidos / $numelementos);
+    } catch (PDOException $e) {
 
-        desconectarBD($conexion);
+        echo "Error: Error al conectarse con la base de datos: " . $e->getMessage();
 
-        return $numpaginas;		
+        file_put_contents("PDOErrors.txt", "\r\n" . date('j F, Y, g:i a ') . $e->getMessage(), FILE_APPEND);
 
-    }
-    
-
-    #   Seleccionar todos los productos sin paginación.
-
-    function seleccionar_todos_productos() {
-
-        $conexion = conectarBD();
-
-        try {		
-
-            $sql = "SELECT * FROM productos";  
-
-            $stmt = $conexion -> query($sql);
-
-            $rows = $stmt -> fetchAll(PDO::FETCH_ASSOC);		
-
-        } catch (PDOException $e) {		
-
-            echo "Error: Error al conectarse con la base de datos: ". $e -> getMessage();
-
-            file_put_contents("PDOErrors.txt", "\r\n".date('j F, Y, g:i a ').$e -> getMessage(), FILE_APPEND);
-
-            exit;
-                
-        }
-        
-        desconectarBD($conexion);
-
-        return $rows;		
+        exit;
 
     }
 
+    $numfilas = $stmt->rowCount();
 
-    #   Consulta para mostrar sólo los últimos cuatro productos añadidos (novedades).
+    desconectarBD($conexion);
 
-    function seleccionar_novedades() {
+    return $numfilas;
 
-        $conexion = conectarBD();
-
-        try {		
-
-            $sql = "SELECT * FROM productos order by idProducto DESC LIMIT 4";  
-
-            $stmt = $conexion -> query($sql);
-
-            $rows = $stmt -> fetchAll(PDO::FETCH_ASSOC);		
-
-        } catch (PDOException $e) {		
-
-            echo "Error: Error al conectarse con la base de datos: ". $e -> getMessage();
-
-            file_put_contents("PDOErrors.txt", "\r\n".date('j F, Y, g:i a ').$e -> getMessage(), FILE_APPEND);
-
-            exit;
-                
-        }
-        
-        desconectarBD($conexion);
-
-        return $rows;		
-
-    }
+}
 
 
-    #   Seleccionar un producto en concreto.
-        
-    function seleccionar_producto ($idProducto) {
+#   Iniciar sesión.
 
-        $conexion = conectarBD();
+function login($email, $password)
+{
 
-        try {		
+    $conexion = conectarBD();
 
-            $sql = "SELECT * FROM productos WHERE idProducto = :idProducto";  
+    try {
 
-            $stmt = $conexion -> prepare($sql);
+        $sql = "SELECT * FROM usuarios WHERE email = :email AND online = 1";
 
-            $stmt -> bindParam(':idProducto', $idProducto);
+        $stmt = $conexion->prepare($sql);
 
-            $stmt -> execute();
+        $stmt->bindParam(':email', $email);
 
-            $row = $stmt -> fetch(PDO::FETCH_ASSOC);		
+        $stmt->execute();
 
-        } catch (PDOException $e) {		
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            echo "Error: Error al conectarse con la base de datos: ". $e -> getMessage();
+    } catch (PDOException $e) {
 
-            file_put_contents("PDOErrors.txt", "\r\n".date('j F, Y, g:i a ').$e -> getMessage(), FILE_APPEND);
+        echo "Error: Error al conectarse con la base de datos: " . $e->getMessage();
 
-            exit;
+        file_put_contents("PDOErrors.txt", "\r\n" . date('j F, Y, g:i a ') . $e->getMessage(), FILE_APPEND);
 
-        }
-
-        desconectarBD($conexion);
-
-        return $row;		
+        exit;
 
     }
 
-    #   Seleccionar un usuario en concreto.
-    
-    function seleccionar_usuario ($email) {
+    return password_verify($password, $row['password']);
 
-        $conexion = conectarBD();
+}
 
-        try {		
 
-            $sql = "SELECT * FROM usuarios WHERE email = :email";  
+#   Consulta para mostrar todos los productos y hacer la paginación.
 
-            $stmt = $conexion -> prepare($sql);
+function paginacion_productos($inicio, $numelementos)
+{
 
-            $stmt -> bindParam(':email', $email);
+    $conexion = conectarBD();
 
-            $stmt -> execute();
+    try {
 
-            $row = $stmt -> fetch(PDO::FETCH_ASSOC);		
+        $sql = "SELECT * from productos WHERE estado = 1 order by idProducto DESC LIMIT :inicio, :numelementos";
 
-        } catch (PDOException $e) {		
+        $stmt = $conexion->prepare($sql);
 
-            echo "Error: Error al conectarse con la base de datos: ". $e -> getMessage();
+        $stmt->bindParam(':inicio', $inicio, PDO::PARAM_INT);
+        $stmt->bindParam(':numelementos', $numelementos, PDO::PARAM_INT);
 
-            file_put_contents("PDOErrors.txt", "\r\n".date('j F, Y, g:i a ').$e -> getMessage(), FILE_APPEND);
+        $stmt->execute();
 
-            exit;
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        }
+    } catch (PDOException $e) {
 
-        desconectarBD($conexion);
+        echo "Error: Error al conectarse con la base de datos: " . $e->getMessage();
 
-        return $row;		
+        file_put_contents("PDOErrors.txt", "\r\n" . date('j F, Y, g:i a ') . $e->getMessage(), FILE_APPEND);
+
+        exit;
 
     }
+
+    desconectarBD($conexion);
+
+    return $rows;
+
+}
+
+
+#   Necesario para paginación. Calcula el número de páginas a mostrar según el número de elementos de la base de datos.
+
+function num_paginas_productos($numelementos)
+{
+
+    $conexion = conectarBD();
+
+    try {
+
+        $sql = "SELECT count(*) FROM productos WHERE estado = 1";
+
+        $numproductos = $conexion->query($sql)->fetchColumn();
+
+    } catch (PDOException $e) {
+
+        echo "Error: Error al conectarse con la base de datos: " . $e->getMessage();
+
+        file_put_contents("PDOErrors.txt", "\r\n" . date('j F, Y, g:i a ') . $e->getMessage(), FILE_APPEND);
+
+        exit;
+
+    }
+
+    $numpaginas = ceil($numproductos / $numelementos);
+
+    desconectarBD($conexion);
+
+    return $numpaginas;
+
+}
+
+
+#   Consulta para mostrar todos los pedidos de un usuario y hacer la paginación.
+
+function paginacion_pedidos($inicio, $numelementos, $idUsuario)
+{
+
+    $conexion = conectarBD();
+
+    try {
+
+        $sql = "SELECT a.*, b.estado from pedidos a, estados b WHERE idUsuario = :idUsuario  AND a.idEstado = b.idEstado ORDER BY a.fecha DESC LIMIT :inicio, :numelementos";
+
+        $stmt = $conexion->prepare($sql);
+
+        $stmt->bindParam(':inicio', $inicio, PDO::PARAM_INT);
+        $stmt->bindParam(':numelementos', $numelementos, PDO::PARAM_INT);
+        $stmt->bindParam(':idUsuario', $idUsuario);
+
+        $stmt->execute();
+
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    } catch (PDOException $e) {
+
+        echo "Error: Error al conectarse con la base de datos: " . $e->getMessage();
+
+        file_put_contents("PDOErrors.txt", "\r\n" . date('j F, Y, g:i a ') . $e->getMessage(), FILE_APPEND);
+
+        exit;
+
+    }
+
+    desconectarBD($conexion);
+
+    return $rows;
+
+}
+
+
+#   Necesario para paginación. Calcula el número de páginas a mostrar según el número de elementos de la base de datos.
+
+function num_paginas_pedidos($numelementos)
+{
+
+    $conexion = conectarBD();
+
+    try {
+
+        $sql = "SELECT count(*) FROM pedidos WHERE idUsuario = :idUsuario";
+
+        $stmt = $conexion->prepare($sql);
+
+        $stmt->bindParam(':idUsuario', $idUsuario, PDO::PARAM_INT);
+
+        $stmt->execute();
+
+        $numpedidos = $stmt->fetchColumn();
+
+    } catch (PDOException $e) {
+
+        echo "Error: Error al conectarse con la base de datos: " . $e->getMessage();
+
+        file_put_contents("PDOErrors.txt", "\r\n" . date('j F, Y, g:i a ') . $e->getMessage(), FILE_APPEND);
+
+        exit;
+
+    }
+
+    $numpaginas = ceil($numpedidos / $numelementos);
+
+    desconectarBD($conexion);
+
+    return $numpaginas;
+
+}
+
+
+#   Seleccionar todos los productos sin paginación.
+
+function seleccionar_todos_productos()
+{
+
+    $conexion = conectarBD();
+
+    try {
+
+        $sql = "SELECT * FROM productos";
+
+        $stmt = $conexion->query($sql);
+
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    } catch (PDOException $e) {
+
+        echo "Error: Error al conectarse con la base de datos: " . $e->getMessage();
+
+        file_put_contents("PDOErrors.txt", "\r\n" . date('j F, Y, g:i a ') . $e->getMessage(), FILE_APPEND);
+
+        exit;
+
+    }
+
+    desconectarBD($conexion);
+
+    return $rows;
+
+}
+
+
+#   Consulta para mostrar sólo los últimos cuatro productos añadidos (novedades).
+
+function seleccionar_novedades()
+{
+
+    $conexion = conectarBD();
+
+    try {
+
+        $sql = "SELECT * FROM productos order by idProducto DESC LIMIT 4";
+
+        $stmt = $conexion->query($sql);
+
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    } catch (PDOException $e) {
+
+        echo "Error: Error al conectarse con la base de datos: " . $e->getMessage();
+
+        file_put_contents("PDOErrors.txt", "\r\n" . date('j F, Y, g:i a ') . $e->getMessage(), FILE_APPEND);
+
+        exit;
+
+    }
+
+    desconectarBD($conexion);
+
+    return $rows;
+
+}
+
+
+#   Seleccionar un producto en concreto.
+
+function seleccionar_producto($idProducto)
+{
+
+    $conexion = conectarBD();
+
+    try {
+
+        $sql = "SELECT * FROM productos WHERE idProducto = :idProducto";
+
+        $stmt = $conexion->prepare($sql);
+
+        $stmt->bindParam(':idProducto', $idProducto);
+
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    } catch (PDOException $e) {
+
+        echo "Error: Error al conectarse con la base de datos: " . $e->getMessage();
+
+        file_put_contents("PDOErrors.txt", "\r\n" . date('j F, Y, g:i a ') . $e->getMessage(), FILE_APPEND);
+
+        exit;
+
+    }
+
+    desconectarBD($conexion);
+
+    return $row;
+
+}
+
+#   Seleccionar un usuario en concreto.
+
+function seleccionar_usuario($email)
+{
+
+    $conexion = conectarBD();
+
+    try {
+
+        $sql = "SELECT * FROM usuarios WHERE email = :email";
+
+        $stmt = $conexion->prepare($sql);
+
+        $stmt->bindParam(':email', $email);
+
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    } catch (PDOException $e) {
+
+        echo "Error: Error al conectarse con la base de datos: " . $e->getMessage();
+
+        file_put_contents("PDOErrors.txt", "\r\n" . date('j F, Y, g:i a ') . $e->getMessage(), FILE_APPEND);
+
+        exit;
+
+    }
+
+    desconectarBD($conexion);
+
+    return $row;
+
+}
 
 #   Seleccionar un usuario en concreto V2.
 
-    function seleccionar_usuario2 ($email) {
+function seleccionar_usuario2($email)
+{
 
-        $conexion = conectarBD();
+    $conexion = conectarBD();
 
-        try {		
+    try {
 
-            $sql = "SELECT * FROM usuarios WHERE email = :email";  
+        $sql = "SELECT * FROM usuarios WHERE email = :email";
 
-            $stmt = $conexion -> prepare($sql);
+        $stmt = $conexion->prepare($sql);
 
-            $stmt -> bindParam(':email', $email);
+        $stmt->bindParam(':email', $email);
 
-            $stmt -> execute();
+        $stmt->execute();
 
-            $row = $stmt -> fetchAll(PDO::FETCH_ASSOC);		
+        $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        } catch (PDOException $e) {		
+    } catch (PDOException $e) {
 
-            echo "Error: Error al conectarse con la base de datos: ". $e -> getMessage();
+        echo "Error: Error al conectarse con la base de datos: " . $e->getMessage();
 
-            file_put_contents("PDOErrors.txt", "\r\n".date('j F, Y, g:i a ').$e -> getMessage(), FILE_APPEND);
+        file_put_contents("PDOErrors.txt", "\r\n" . date('j F, Y, g:i a ') . $e->getMessage(), FILE_APPEND);
 
-            exit;
+        exit;
+
+    }
+
+    desconectarBD($conexion);
+
+    return $row;
+
+}
+
+
+#   Añadir un pedido.
+
+function insertarPedido($idUsuario, $carrito, $total)
+{
+
+    $conexion = conectarBD();
+
+    try {
+
+        $conexion->beginTransaction();
+
+        $sql = "INSERT INTO pedidos (idUsuario, total, fecha, idEstado) VALUES (:idUsuario, :total, NOW(), 1)";
+
+        $stmt = $conexion->prepare($sql);
+
+        $stmt->bindParam(':idUsuario', $idUsuario);
+
+        $stmt->bindParam(':total', $total);
+
+        $stmt->execute();
+
+        $idPedido = $conexion->lastInsertId();
+
+        foreach ($carrito as $idProducto => $cantidad) {
+
+            $producto = seleccionar_producto($idProducto);
+
+            $precio = $producto["precioOferta"];
+
+            $sql2 = "INSERT INTO detallespedidos (idPedido, idProducto, cantidad, precio) VALUES (:idPedido, :idProducto, :cantidad, :precio)";
+
+            $stmt = $conexion->prepare($sql2);
+
+            $stmt->bindParam(':idPedido', $idPedido);
+            $stmt->bindParam(':idProducto', $idProducto);
+            $stmt->bindParam(':cantidad', $cantidad);
+            $stmt->bindParam(':precio', $precio);
+
+            $stmt->execute();
 
         }
 
-        desconectarBD($conexion);
+        $conexion->commit();
 
-        return $row;		
+    } catch (PDOException $e) {
 
-    }
+        $conexion->rollback();
 
+        echo "Error: Error al conectarse con la base de datos: " . $e->getMessage();
 
-    #   Añadir un pedido.
+        file_put_contents("PDOErrors.txt", "\r\n" . date('j F, Y, g:i a ') . $e->getMessage(), FILE_APPEND);
 
-    function insertarPedido ($idUsuario, $carrito, $total) {
-
-        $conexion = conectarBD();
-
-        try {		
-
-            $conexion -> beginTransaction();
-
-            $sql = "INSERT INTO pedidos (idUsuario, total) VALUES (:idUsuario, :total)";  
-
-            $stmt = $conexion -> prepare($sql);
-
-            $stmt -> bindParam(':idUsuario', $idUsuario);
-
-            $stmt -> bindParam(':total', $total);
-
-            $stmt -> execute();
-
-            $idPedido = $conexion -> lastInsertId();
-            
-            foreach ($carrito as $idProducto => $cantidad) {
-
-                $producto = seleccionar_producto($idProducto);  
-
-                $precio = $producto["precioOferta"];
-
-                $sql2 = "INSERT INTO detallespedidos (idPedido, idProducto, cantidad, precio) VALUES (:idPedido, :idProducto, :cantidad, :precio)"; 
-
-                $stmt = $conexion -> prepare($sql2);
-
-                $stmt -> bindParam(':idPedido', $idPedido);
-                $stmt -> bindParam(':idProducto', $idProducto);
-                $stmt -> bindParam(':cantidad', $cantidad);
-                $stmt -> bindParam(':precio', $precio);
-
-                $stmt -> execute();
-
-            }
-
-            $conexion -> commit();
-
-        } catch (PDOException $e) {	
-            
-            $conexion -> rollback();
-
-            echo "Error: Error al conectarse con la base de datos: ". $e -> getMessage();
-
-            file_put_contents("PDOErrors.txt", "\r\n".date('j F, Y, g:i a ').$e -> getMessage(), FILE_APPEND);
-
-            exit;
-
-        }
-
-        desconectarBD($conexion);
-
-        return $idPedido;	
+        exit;
 
     }
 
+    desconectarBD($conexion);
 
-    #   Seleccionar un pedido en concreto.
+    return $idPedido;
 
-    function seleccionar_pedido ($idPedido) {
-
-        $conexion = conectarBD();
-
-        try {
-
-            $sql = "SELECT a.*, b.estado FROM pedidos a, estados b WHERE a.idPedido = :idPedido  AND a.idEstado = b.idEstado";
-
-            $stmt = $conexion -> prepare($sql);
-
-            $stmt -> bindParam(':idPedido', $idPedido);	
-
-            $stmt -> execute();
-
-            $rows = $stmt -> fetchAll(PDO::FETCH_ASSOC);
-
-        } catch (PDOException $e) {		
-
-            echo "Error: Error al conectarse con la base de datos: ". $e -> getMessage();
-
-            file_put_contents("PDOErrors.txt", "\r\n".date('j F, Y, g:i a ').$e -> getMessage(), FILE_APPEND);
-
-            exit;
-                
-        }
-        
-        desconectarBD($conexion);
-
-        return $rows;
-
-    }
+}
 
 
-    #   Seleccionar los detalles de un pedido. 
-    
-    function seleccionar_detalles_pedido ($idPedido) {
+#   Seleccionar un pedido en concreto.
 
-        $conexion = conectarBD();
+function seleccionar_pedido($idPedido)
+{
 
-        try {
+    $conexion = conectarBD();
 
-            $sql = "SELECT a.*, b.* FROM detallespedidos a, productos b WHERE idPedido = :idPedido and a.idProducto = b.idProducto";
+    try {
 
-            $stmt = $conexion -> prepare($sql);
+        $sql = "SELECT a.*, b.estado FROM pedidos a, estados b WHERE a.idPedido = :idPedido  AND a.idEstado = b.idEstado";
 
-            $stmt -> bindParam(':idPedido', $idPedido);	
+        $stmt = $conexion->prepare($sql);
 
-            $stmt -> execute();
+        $stmt->bindParam(':idPedido', $idPedido);
 
-            $rows = $stmt -> fetchAll(PDO::FETCH_ASSOC);	
+        $stmt->execute();
 
-        } catch (PDOException $e) {		
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            echo "Error: Error al conectarse con la base de datos: ". $e -> getMessage();
+    } catch (PDOException $e) {
 
-            file_put_contents("PDOErrors.txt", "\r\n".date('j F, Y, g:i a ').$e -> getMessage(), FILE_APPEND);
+        echo "Error: Error al conectarse con la base de datos: " . $e->getMessage();
 
-            exit;
-                
-        }
-        
-        desconectarBD($conexion);
+        file_put_contents("PDOErrors.txt", "\r\n" . date('j F, Y, g:i a ') . $e->getMessage(), FILE_APPEND);
 
-        return $rows;
+        exit;
 
     }
 
+    desconectarBD($conexion);
 
-	function editar_usuario ($idUsuario, $email, $nombre, $apellidos, $direccion, $telefono) {
+    return $rows;
 
-		$conexion = conectarBD();
+}
 
-		try {		
 
-			$sql = "UPDATE usuarios SET email = :email, nombre = :nombre, apellidos = :apellidos, direccion = :direccion, telefono = :telefono WHERE idUsuario = :idUsuario"; 	
+#   Seleccionar los detalles de un pedido. 
 
-			$stmt = $conexion -> prepare($sql);
+function seleccionar_detalles_pedido($idPedido)
+{
 
-			$stmt -> bindParam(':idUsuario', $idUsuario);
-			$stmt -> bindParam(':email', $email);
-			$stmt -> bindParam(':nombre', $nombre);
-			$stmt -> bindParam(':apellidos', $apellidos);
-			$stmt -> bindParam(':direccion', $direccion);
-			$stmt -> bindParam(':telefono', $telefono);
+    $conexion = conectarBD();
 
-			$stmt -> execute();
+    try {
 
-		} catch (PDOException $e) {		
+        $sql = "SELECT a.*, b.* FROM detallespedidos a, productos b WHERE idPedido = :idPedido and a.idProducto = b.idProducto";
 
-			echo "Error: Error al conectarse con la base de datos: ". $e -> getMessage();
+        $stmt = $conexion->prepare($sql);
 
-			file_put_contents("PDOErrors.txt", "\r\n".date('j F, Y, g:i a ').$e -> getMessage(), FILE_APPEND);
+        $stmt->bindParam(':idPedido', $idPedido);
 
-			exit;
-				
-		}
+        $stmt->execute();
 
-		$numfilas = $stmt -> rowCount();
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-		desconectarBD($conexion);
+    } catch (PDOException $e) {
 
-		return $numfilas;	
+        echo "Error: Error al conectarse con la base de datos: " . $e->getMessage();
+
+        file_put_contents("PDOErrors.txt", "\r\n" . date('j F, Y, g:i a ') . $e->getMessage(), FILE_APPEND);
+
+        exit;
 
     }
 
+    desconectarBD($conexion);
 
-	function cambiarPassword ($idUsuario, $passwordNew1) {
+    return $rows;
 
-		$conexion = conectarBD();
-		
-		try {
-			
-			$sql = "UPDATE usuarios SET password = :passwordNew1 WHERE idUsuario = :idUsuario";	
+}
 
-			$stmt = $conexion -> prepare($sql);			
 
-			$stmt -> bindParam(':idUsuario', $idUsuario);
-			
-			$passwordNew1 = password_hash($passwordNew1, PASSWORD_BCRYPT);
+function editar_usuario($idUsuario, $email, $nombre, $apellidos, $direccion, $telefono)
+{
 
-			$stmt -> bindParam(':passwordNew1', $passwordNew1);
+    $conexion = conectarBD();
 
-			$stmt -> execute();
-			
-		} catch (PDOException $e) {		
-			
-			echo "Error: Error al conectarse con la base de datos: ". $e -> getMessage();
+    try {
 
-			file_put_contents("PDOErrors.txt", "\r\n".date('j F, Y, g:i a ').$e -> getMessage(), FILE_APPEND);
+        $sql = "UPDATE usuarios SET email = :email, nombre = :nombre, apellidos = :apellidos, direccion = :direccion, telefono = :telefono WHERE idUsuario = :idUsuario";
 
-			exit;
-				
-		}
-		
-		$numfilas = $stmt -> rowCount();
+        $stmt = $conexion->prepare($sql);
 
-		desconectarBD($conexion);
+        $stmt->bindParam(':idUsuario', $idUsuario);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':nombre', $nombre);
+        $stmt->bindParam(':apellidos', $apellidos);
+        $stmt->bindParam(':direccion', $direccion);
+        $stmt->bindParam(':telefono', $telefono);
 
-		return $numfilas;	
-		
-	}
+        $stmt->execute();
+
+    } catch (PDOException $e) {
+
+        echo "Error: Error al conectarse con la base de datos: " . $e->getMessage();
+
+        file_put_contents("PDOErrors.txt", "\r\n" . date('j F, Y, g:i a ') . $e->getMessage(), FILE_APPEND);
+
+        exit;
+
+    }
+
+    $numfilas = $stmt->rowCount();
+
+    desconectarBD($conexion);
+
+    return $numfilas;
+
+}
+
+
+function cambiarPassword($idUsuario, $passwordNew1)
+{
+
+    $conexion = conectarBD();
+
+    try {
+
+        $sql = "UPDATE usuarios SET password = :passwordNew1 WHERE idUsuario = :idUsuario";
+
+        $stmt = $conexion->prepare($sql);
+
+        $stmt->bindParam(':idUsuario', $idUsuario);
+
+        $passwordNew1 = password_hash($passwordNew1, PASSWORD_BCRYPT);
+
+        $stmt->bindParam(':passwordNew1', $passwordNew1);
+
+        $stmt->execute();
+
+    } catch (PDOException $e) {
+
+        echo "Error: Error al conectarse con la base de datos: " . $e->getMessage();
+
+        file_put_contents("PDOErrors.txt", "\r\n" . date('j F, Y, g:i a ') . $e->getMessage(), FILE_APPEND);
+
+        exit;
+
+    }
+
+    $numfilas = $stmt->rowCount();
+
+    desconectarBD($conexion);
+
+    return $numfilas;
+
+}
 
 ?>
