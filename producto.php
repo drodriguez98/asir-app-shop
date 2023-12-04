@@ -97,47 +97,47 @@ if (!empty($_SESSION['carrito'])) {
 
                     if (isset($_SESSION['user'])) { ?>    
 
-                                                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
 
-                                                        <li class="nav-item"> <a href="miperfil.php" class="nav-link"><?php echo $_SESSION['user']; ?></a></li>
+                                    <li class="nav-item"> <a href="miPerfil.php" class="nav-link"><?php echo $_SESSION['user']; ?></a></li>
 
-                                                    </ul>          
+                                </ul>          
 
-                                                    <div class="text-end">
+                                <div class="text-end">
 
-                                                        <a href="mispedidos.php" class="btn btn-light">Mis pedidos</a>
+                                    <a href="misPedidos.php" class="btn btn-light">Mis pedidos</a>
 
-                                                    </div>
+                                </div>
 
-                                                    <a href="carrito.php" class="btn btn-outline-dark">
+                                <a href="carrito.php" class="btn btn-outline-dark">
 
-                                                        <i class="bi-cart-fill me-1"></i>Carrito<span class="badge bg-dark text-white ms-1 rounded-pill"><?php echo $numProductos; ?></span>
+                                    <i class="bi-cart-fill me-1"></i>Carrito<span class="badge bg-dark text-white ms-1 rounded-pill"><?php echo $numProductos; ?></span>
 
-                                                    </a>
+                                </a>
 
-                                                    <div class="text-end">
-        
-                                                        <a href="logout.php" class="btn btn-outline-dark">Cerrar sesión</a>
+                                <div class="text-end">
 
-                                                    </div>
+                                    <a href="logout.php" class="btn btn-outline-dark">Cerrar sesión</a>
+
+                                </div>
 
                     <?php } else { ?>
 
-                                                    <form class="d-flex">
+                                <form class="d-flex">
 
-                                                        <a href="carrito.php" class="btn btn-outline-dark">
+                                    <a href="carrito.php" class="btn btn-outline-dark">
 
-                                                            <i class="bi-cart-fill me-1"></i>Carrito<span class="badge bg-dark text-white ms-1 rounded-pill">0</span>
+                                        <i class="bi-cart-fill me-1"></i>Carrito<span class="badge bg-dark text-white ms-1 rounded-pill">0</span>
 
-                                                        </a>
+                                    </a>
 
-                                                    </form>
+                                </form>
 
-                                                    <div class="text-end">
+                                <div class="text-end">
 
-                                                        <a href="login.php" class="btn btn-light">Iniciar sesión</a>
+                                    <a href="login.php" class="btn btn-light">Iniciar sesión</a>
 
-                                                    </div>
+                                </div>
 
                         <?php } ?>
                     
@@ -174,7 +174,7 @@ if (!empty($_SESSION['carrito'])) {
                         
                         <div class="d-flex">
 
-                            <a href="procesa-carrito.php?idProducto=<?= $idProducto ?>&operacion=add" class="btn btn-outline-dark flex-shrink-0">  
+                            <a href="procesaCarrito.php?idProducto=<?= $idProducto ?>&operacion=add" class="btn btn-outline-dark flex-shrink-0">  
 
                                 <i class="bi-cart-fill me-1"></i>
 

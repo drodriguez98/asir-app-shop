@@ -83,7 +83,7 @@
                         <td><?= $fecha ?></td>
                         <td><?= $estado ?></td>
                         <td><?= $total ?> €</td>
-                        <td><a href="detallespedido.php?idPedido=<?=$idPedido?>" class="btn btn-primary">Ver detalles</a></td>
+                        <td><a href="detallesPedido.php?idPedido=<?=$idPedido?>" class="btn btn-primary">Ver detalles</a></td>
 
                     </tr>
 

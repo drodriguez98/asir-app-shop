@@ -1,12 +1,12 @@
 <?php session_start(); ?>
 
-<?php include ("inc/bbdd.php"); ?>
-<?php include ("inc/funciones.php"); ?>
+<?php include("inc/bbdd.php"); ?>
+<?php include("inc/funciones.php"); ?>
 
 <?php
 
-    $titulo1 = "Nosotros";
-    $titulo2 = "¿Quiénes somos?";
+$titulo1 = "Nosotros";
+$titulo2 = "¿Quiénes somos?";
 
 ?>
 
@@ -21,7 +21,7 @@
         <meta name="description" content="" />
         <meta name="author" content="" />
 
-        <title><?=$titulo1;?></title>
+        <title><?= $titulo1; ?></title>
 
         <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
 
@@ -54,37 +54,21 @@
 
                     </ul>
 
-                    <?php 
-                    
-                        if (isset($_SESSION['user'])) {	?>	
+                    <?php
 
-                            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                    if (isset($_SESSION['user'])) { ?>    
 
-                            <li class="nav-item"> <a href="miperfil.php" class="nav-link"><?php echo $_SESSION['user']; ?></a></li>
+                                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
 
-                            </ul>          
+                                <li class="nav-item"> <a href="miPerfil.php" class="nav-link"><?php echo $_SESSION['user']; ?></a></li>
 
-                            <div class="text-end">
+                                </ul>          
 
-                                <a href="mispedidos.php" class="btn btn-light">Mis pedidos</a>
+                                <div class="text-end">
 
-                            </div>
+                                    <a href="misPedidos.php" class="btn btn-light">Mis pedidos</a>
 
-                            <a href="carrito.php" class="btn btn-outline-dark">
-
-                                <i class="bi-cart-fill me-1"></i>Carrito<span class="badge bg-dark text-white ms-1 rounded-pill">0</span>
-
-                            </a>
-
-                            <div class="text-end">
-        
-                                <a href="logout.php" class="btn btn-danger">Cerrar sesión</a>
-
-                            </div>
-
-                    <?php } else { ?>
-
-                            <form class="d-flex">
+                                </div>
 
                                 <a href="carrito.php" class="btn btn-outline-dark">
 
@@ -92,13 +76,29 @@
 
                                 </a>
 
-                            </form>
+                                <div class="text-end">
+        
+                                    <a href="logout.php" class="btn btn-danger">Cerrar sesión</a>
 
-                            <div class="text-end">
+                                </div>
 
-                                <a href="login.php" class="btn btn-light">Iniciar sesión</a>
+                    <?php } else { ?>
 
-                            </div>
+                                <form class="d-flex">
+
+                                    <a href="carrito.php" class="btn btn-outline-dark">
+
+                                        <i class="bi-cart-fill me-1"></i>Carrito<span class="badge bg-dark text-white ms-1 rounded-pill">0</span>
+
+                                    </a>
+
+                                </form>
+
+                                <div class="text-end">
+
+                                    <a href="login.php" class="btn btn-light">Iniciar sesión</a>
+
+                                </div>
 
                         <?php } ?>
                     

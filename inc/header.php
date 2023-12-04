@@ -2,19 +2,19 @@
 
 <?php
 
-    $numProductos = 0;
+$numProductos = 0;
 
-    if (!empty($_SESSION['carrito'])) {
+if (!empty($_SESSION['carrito'])) {
 
-        $cantidades = $_SESSION['carrito'];
+    $cantidades = $_SESSION['carrito'];
 
-        foreach ($cantidades as $cantidad) {
+    foreach ($cantidades as $cantidad) {
 
-            $numProductos=$numProductos+$cantidad;
-
-        }
+        $numProductos = $numProductos + $cantidad;
 
     }
+
+}
 
 ?>
 
@@ -27,7 +27,7 @@
         <meta name="description" content="" />
         <meta name="author" content="" />
 
-        <title><?=$titulo1;?></title>
+        <title><?= $titulo1; ?></title>
 
         <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
 
@@ -60,48 +60,48 @@
 
                     </ul>
 
-                    <?php 
-                    
-                        if (isset($_SESSION['user'])) {	?>	
+                    <?php
 
-                            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                    if (isset($_SESSION['user'])) { ?>    
 
-                                <li class="nav-item"> <a href="miperfil.php" class="nav-link"><?php echo $_SESSION['user']; ?></a></li>
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
 
-                            </ul>  
+                            <li class="nav-item"> <a href="miPerfil.php" class="nav-link"><?php echo $_SESSION['user']; ?></a></li>
 
-                            <div class="text-end">
+                        </ul>  
 
-                                <a href="mispedidos.php" class="btn btn-light">Mis pedidos</a>
+                        <div class="text-end">
 
-                            </div>
+                            <a href="misPedidos.php" class="btn btn-light">Mis pedidos</a>
 
-                            <a href="carrito.php" class="btn btn-outline-dark"><i class="bi-cart-fill me-1"></i>Carrito<span class="badge bg-dark text-white ms-1 rounded-pill"><?php echo $numProductos; ?></span></a>
+                        </div>
 
-                            <div class="text-end">
-        
-                                <a href="logout.php" class="btn btn-outline-dark">Cerrar sesión</a>
+                        <a href="carrito.php" class="btn btn-outline-dark"><i class="bi-cart-fill me-1"></i>Carrito<span class="badge bg-dark text-white ms-1 rounded-pill"><?php echo $numProductos; ?></span></a>
 
-                            </div>
+                        <div class="text-end">
+
+                            <a href="logout.php" class="btn btn-outline-dark">Cerrar sesión</a>
+
+                        </div>
 
                     <?php } else { ?>
 
-                            <form class="d-flex">
+                        <form class="d-flex">
 
-                                <a href="carrito.php" class="btn btn-outline-dark">
+                            <a href="carrito.php" class="btn btn-outline-dark">
 
-                                    <i class="bi-cart-fill me-1"></i>Carrito<span class="badge bg-dark text-white ms-1 rounded-pill"></span>
-                                 
+                                <i class="bi-cart-fill me-1"></i>Carrito<span class="badge bg-dark text-white ms-1 rounded-pill"></span>
+                        
 
-                                </a>
+                            </a>
 
-                            </form>
+                        </form>
 
-                            <div class="text-end">
+                        <div class="text-end">
 
-                                <a href="login.php" class="btn btn-light">Iniciar sesión</a>
+                            <a href="login.php" class="btn btn-light">Iniciar sesión</a>
 
-                            </div>
+                        </div>
 
                         <?php } ?>
                     
@@ -120,7 +120,7 @@
 
                 <div class="text-center text-white">
 
-                    <h1 class="display-4 fw-bolder"><?php echo $titulo2;?></h1>
+                    <h1 class="display-4 fw-bolder"><?php echo $titulo2; ?></h1>
 
                 </div>
 
