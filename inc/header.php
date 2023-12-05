@@ -64,44 +64,43 @@ if (!empty($_SESSION['carrito'])) {
 
                     if (isset($_SESSION['user'])) { ?>    
 
-                        <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
 
-                            <li class="nav-item"> <a href="miPerfil.php" class="nav-link"><?php echo $_SESSION['user']; ?></a></li>
+                                    <li class="nav-item"> <a href="miPerfil.php" class="nav-link"><?php echo $_SESSION['user']; ?></a></li>
 
-                        </ul>  
+                                </ul>  
 
-                        <div class="text-end">
+                                <div class="text-end">
 
-                            <a href="misPedidos.php" class="btn btn-light">Mis pedidos</a>
+                                    <a href="misPedidos.php" class="btn btn-light">Mis pedidos</a>
 
-                        </div>
+                                </div>
 
-                        <a href="carrito.php" class="btn btn-outline-dark"><i class="bi-cart-fill me-1"></i>Carrito<span class="badge bg-dark text-white ms-1 rounded-pill"><?php echo $numProductos; ?></span></a>
+                                <a href="carrito.php" class="btn btn-outline-dark"><i class="bi-cart-fill me-1"></i>Carrito<span class="badge bg-dark text-white ms-1 rounded-pill"><?php echo $numProductos; ?></span></a>
 
-                        <div class="text-end">
+                                <div class="text-end">
 
-                            <a href="logout.php" class="btn btn-outline-dark">Cerrar sesión</a>
+                                    <a href="logout.php" class="btn btn-outline-dark">Cerrar sesión</a>
 
-                        </div>
+                                </div>
 
                     <?php } else { ?>
 
-                        <form class="d-flex">
+                                <form class="d-flex">
 
-                            <a href="carrito.php" class="btn btn-outline-dark">
+                                    <a href="carrito.php" class="btn btn-outline-dark">
 
-                                <i class="bi-cart-fill me-1"></i>Carrito<span class="badge bg-dark text-white ms-1 rounded-pill"></span>
+                                        <i class="bi-cart-fill me-1"></i>Carrito<span class="badge bg-dark text-white ms-1 rounded-pill"><?php echo $numProductos; ?></span>
                         
+                                    </a>
 
-                            </a>
+                                </form>
 
-                        </form>
+                                <div class="text-end">
 
-                        <div class="text-end">
+                                    <a href="login.php" class="btn btn-light">Iniciar sesión</a>
 
-                            <a href="login.php" class="btn btn-light">Iniciar sesión</a>
-
-                        </div>
+                                </div>
 
                         <?php } ?>
                     
